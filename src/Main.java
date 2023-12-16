@@ -1,4 +1,7 @@
 /*
+
+PART ONE
+
 The newly-improved calibration document consists of lines of text; each line originally contained a specific calibration value that the Elves now need to recover. On each line, the calibration value can be found by combining the first digit and the last digit (in that order) to form a single two-digit number.
 
 For example:
@@ -11,6 +14,23 @@ treb7uchet
 In this example, the calibration values of these four lines are 12, 38, 15, and 77. Adding these together produces 142.
 
 Consider your entire calibration document. What is the sum of all of the calibration values?
+
+PART TWO
+
+Your calculation isn't quite right. It looks like some of the digits are actually spelled out with letters: one, two, three, four, five, six, seven, eight, and nine also count as valid "digits".
+
+Equipped with this new information, you now need to find the real first and last digit on each line. For example:
+
+two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+In this example, the calibration values are 29, 83, 13, 24, 42, 14, and 76. Adding these together produces 281.
+
+What is the sum of all of the calibration values?
  */
 
 import java.io.BufferedReader;
@@ -27,8 +47,8 @@ public class Main {
     public static void main(String[] args) {
 
         File file = new File("input.txt");
-        String number = "";
-        int sum = 0;
+        int sum1 = 0;
+        int sum2 = 0;
         Pattern pattern = Pattern.compile("one|two|three|four|five|six|seven|eight|nine", Pattern.CASE_INSENSITIVE);
         ArrayList<Character> numberArray = new ArrayList<>();
         Map<String, Integer> numbers = new HashMap<>();
@@ -45,35 +65,51 @@ public class Main {
         try{
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
-            while((line = reader.readLine()) !=null){
+            while((line = reader.readLine()) != null){
                 StringBuilder builder = new StringBuilder(line);
-                Matcher matcher = pattern.matcher(line);
+                Matcher matcher = pattern.matcher(builder);
                 StringBuffer foundPattern = new StringBuffer();
 
+                //PART ONE
                 for(char sign : line.toCharArray()){
                     if(Character.isDigit(sign)){
                         numberArray.add(sign);
                     }
                 }
 
-                String numberToAdd = String.valueOf(numberArray.get(0)) + String.valueOf(numberArray.get(numberArray.size()-1));
-                sum += Integer.parseInt(numberToAdd);
+                String numberToAdd1 = String.valueOf(numberArray.get(0)) + String.valueOf(numberArray.get(numberArray.size()-1));
+                sum1 += Integer.parseInt(numberToAdd1);
                 numberArray.clear();
 
-//                while(matcher.find()){
-//                    foundPattern.append(matcher.group());
-//
-//                    int length = foundPattern.length();
-//
-//                    Integer replacement = numbers.get(foundPattern.toString());
-//                    StringBuilder patternToChange = new StringBuilder(foundPattern.toString());
-//                    if(replacement != null){
-//                        patternToChange.replace(0,patternToChange.toString().length(),replacement.toString());
-//                    }
-//                }
+                //PART TWO
+                while(matcher.find()){
+                    foundPattern.append(matcher.group());
+                    int startIndex = matcher.start();
+                    int endIndex = startIndex + foundPattern.length();
+                    Integer replacement = numbers.get(foundPattern.toString());
+                    StringBuilder patternToChange = new StringBuilder(foundPattern.toString());
+
+                    if(replacement != null){
+                        patternToChange.replace(0,patternToChange.toString().length(),replacement.toString());
+                        builder.replace(startIndex,endIndex,patternToChange.toString());
+                        foundPattern.delete(0,foundPattern.length());
+                        matcher = pattern.matcher(builder);
+                    }
+                }
+
+                for(char sign : builder.toString().toCharArray()){
+                    if(Character.isDigit(sign)){
+                        numberArray.add(sign);
+                    }
+                }
+
+                String numberToAdd2 = String.valueOf(numberArray.get(0)) + String.valueOf(numberArray.get(numberArray.size()-1));
+                sum2 += Integer.parseInt(numberToAdd2);
+                numberArray.clear();
             }
 
-            System.out.println("Sum: " + sum);
+            System.out.println("Sum1: " + sum1);
+            System.out.println("Sum2: " + sum2);
 
         }catch (FileNotFoundException e){
             System.out.println("File not found");
